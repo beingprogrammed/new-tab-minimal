@@ -301,18 +301,19 @@ body[data-view="clock"] #clock-view {
   position: relative;
   width: 100%;
   max-width: 1300px;
-  min-height: 280px;
+  min-height: 380px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 30px clamp(10px, 3vw, 40px);
+  padding: 0;
+  overflow: visible;
 }
 
 .baseline-guide {
   position: absolute;
   left: 5%;
   right: 5%;
-  top: 50%;
+  top: calc(50% - 7px);
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border-subtle) 15%, var(--border-subtle) 85%, transparent);
   pointer-events: none;
@@ -322,15 +323,26 @@ body[data-view="clock"] #clock-view {
 .cards-track {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: clamp(12px, 2vw, 22px);
+  gap: clamp(14px, 2vw, 24px);
   flex-wrap: nowrap;
   overflow-x: auto;
-  padding: 45px 12px;
+  overflow-y: visible;
+  /* Generous top & bottom padding so deep-scattered cards + hover scale + shadows never get cut off */
+  padding: 70px clamp(24px, 4vw, 48px) 85px clamp(24px, 4vw, 48px);
   scrollbar-width: none;
   z-index: 1;
   width: 100%;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+}
+
+/* Flex centering trick that completely avoids start-loss / cropping the first card */
+.cards-track::before,
+.cards-track::after {
+  content: '';
+  margin: auto;
+  flex-shrink: 0;
 }
 
 .cards-track::-webkit-scrollbar {
@@ -352,6 +364,7 @@ body[data-view="clock"] #clock-view {
   color: var(--text-main);
   padding: 12px 8px;
   cursor: pointer;
+  scroll-snap-align: center;
   transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1),
               background-color var(--transition-fast),
               border-color var(--transition-fast),
@@ -371,7 +384,7 @@ body[data-view="clock"] #clock-view {
   transform: translateY(0px) scale(1.08) !important;
   background-color: var(--bg-tertiary);
   border-color: var(--border-strong);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--accent-glow);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--accent-glow);
   z-index: 10;
 }
 
@@ -948,10 +961,9 @@ body[data-view="clock"] #clock-view {
     display: none;
   }
 
-  /* Allow cards to scroll cleanly horizontally with nice padding */
+  /* Responsive padding for cards track */
   .cards-track {
-    justify-content: flex-start;
-    padding: 40px 16px;
+    padding: 55px clamp(16px, 4vw, 32px) 68px clamp(16px, 4vw, 32px);
   }
 
   .baseline-guide {
@@ -1673,6 +1685,16 @@ function bindEvents() {
   });
 
   initRightDock();
+
+  // Smooth horizontal mouse wheel scroll for cards carousel
+  if (cardsTrack) {
+    cardsTrack.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0 && cardsTrack.scrollWidth > cardsTrack.clientWidth) {
+        e.preventDefault();
+        cardsTrack.scrollLeft += e.deltaY * 1.2;
+      }
+    }, { passive: false });
+  }
 
   window.addEventListener('keydown', (e) => {
     const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
