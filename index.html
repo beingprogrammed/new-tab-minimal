@@ -403,6 +403,39 @@ body[data-view="clock"] #clock-view {
   font-weight: 600;
 }
 
+.card-delete-btn {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  z-index: 5;
+}
+
+.quick-card:hover .card-delete-btn {
+  opacity: 0.7;
+}
+
+.card-delete-btn:hover {
+  opacity: 1 !important;
+  color: var(--danger);
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.12);
+  transform: scale(1.15);
+}
+
 .card-icon-container {
   width: clamp(36px, 3.8vw, 44px);
   height: clamp(36px, 3.8vw, 44px);
@@ -652,6 +685,45 @@ body[data-view="clock"] #clock-view {
   background-color: var(--bg-tertiary);
   border-color: var(--accent);
   color: var(--text-main);
+}
+
+.custom-timer-box {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 2px 4px 2px 10px;
+  gap: 4px;
+  transition: border-color var(--transition-fast);
+}
+
+.custom-timer-box:focus-within {
+  border-color: var(--border-strong);
+}
+
+.custom-timer-box input {
+  width: 44px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  -moz-appearance: textfield;
+}
+
+.custom-timer-box input::-webkit-outer-spin-button,
+.custom-timer-box input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.custom-timer-box .preset-btn {
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  border: none;
+  background: var(--bg-tertiary);
 }
 
 .stopwatch-laps {
@@ -1133,7 +1205,7 @@ body[data-view="clock"] #clock-view {
 
       <!-- SUB-SCREEN 3: TIMER -->
       <section class="clock-panel" id="panel-timer">
-        <div class="timer-display" id="timer-display">15:00</div>
+        <div class="timer-display" id="timer-display" title="Click to set custom time">15:00</div>
         
         <div class="timer-presets">
           <button class="preset-btn" data-mins="1">1m</button>
@@ -1141,6 +1213,10 @@ body[data-view="clock"] #clock-view {
           <button class="preset-btn active" data-mins="15">15m</button>
           <button class="preset-btn" data-mins="25">25m (Pomo)</button>
           <button class="preset-btn" data-mins="45">45m</button>
+          <div class="custom-timer-box" title="Enter custom minutes and click Set or press Enter">
+            <input type="number" id="custom-timer-input" min="1" max="999" placeholder="Mins">
+            <button type="button" class="preset-btn" id="custom-timer-btn">Set</button>
+          </div>
         </div>
 
         <div class="clock-action-row">
@@ -1205,6 +1281,7 @@ body[data-view="clock"] #clock-view {
         <input type="text" id="shortcut-icon" placeholder="GH" maxlength="4">
 
         <div class="modal-actions">
+          <button type="button" class="pill-btn danger" id="reset-defaults-btn" title="Restore default shortcuts">Reset Defaults</button>
           <button type="button" class="pill-btn secondary" id="modal-cancel-btn">Cancel</button>
           <button type="submit" class="pill-btn primary">Add Site</button>
         </div>
@@ -1365,6 +1442,21 @@ function getIconHtml(site) {
   return `<span>${site.icon || site.title.charAt(0).toUpperCase()}</span>`;
 }
 
+function deleteSite(id) {
+  state.sites = state.sites.filter(s => s.id !== id);
+  localStorage.setItem('nft_sites', JSON.stringify(state.sites));
+  renderCards();
+  renderBottomDock();
+}
+
+function resetDefaults() {
+  state.sites = [...DEFAULT_SITES];
+  localStorage.setItem('nft_sites', JSON.stringify(state.sites));
+  renderCards();
+  renderBottomDock();
+  closeModal();
+}
+
 function renderCards() {
   cardsTrack.innerHTML = '';
 
@@ -1380,11 +1472,19 @@ function renderCards() {
       : '';
 
     card.innerHTML = `
+      <button type="button" class="card-delete-btn" title="Remove ${site.title}" aria-label="Remove site">&times;</button>
       ${shortcutBadge}
       <div class="card-icon-container">${getIconHtml(site)}</div>
       <div class="card-title">${site.title}</div>
       <div class="card-domain">${site.domain || ''}</div>
     `;
+
+    const delBtn = card.querySelector('.card-delete-btn');
+    delBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      deleteSite(site.id);
+    });
 
     cardsTrack.appendChild(card);
   });
@@ -1559,9 +1659,44 @@ function initTimer() {
     display.textContent = formatTimer(state.timer.remainingSeconds);
   }
 
+  const customInput = document.getElementById('custom-timer-input');
+  const customBtn = document.getElementById('custom-timer-btn');
+
+  function setCustomTimer() {
+    if (!customInput) return;
+    const mins = parseInt(customInput.value, 10);
+    if (isNaN(mins) || mins <= 0) return;
+    presetBtns.forEach(b => b.classList.remove('active'));
+    if (customBtn) customBtn.classList.add('active');
+    clearInterval(state.timer.timerId);
+    state.timer.running = false;
+    state.timer.totalSeconds = mins * 60;
+    state.timer.remainingSeconds = mins * 60;
+    display.textContent = formatTimer(state.timer.remainingSeconds);
+    startBtn.textContent = 'Start';
+    pauseBtn.disabled = true;
+  }
+
+  if (customBtn) {
+    customBtn.addEventListener('click', setCustomTimer);
+  }
+  if (customInput) {
+    customInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        setCustomTimer();
+      }
+    });
+  }
+
+  display.addEventListener('click', () => {
+    if (customInput) customInput.focus();
+  });
+
   presetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       presetBtns.forEach(b => b.classList.remove('active'));
+      if (customBtn) customBtn.classList.remove('active');
       btn.classList.add('active');
       const mins = parseInt(btn.getAttribute('data-mins'), 10);
       clearInterval(state.timer.timerId);
@@ -1685,6 +1820,15 @@ function bindEvents() {
       alert('Please enter a valid URL.');
     }
   });
+
+  const resetDefaultsBtn = document.getElementById('reset-defaults-btn');
+  if (resetDefaultsBtn) {
+    resetDefaultsBtn.addEventListener('click', () => {
+      if (confirm('Reset all shortcuts back to defaults?')) {
+        resetDefaults();
+      }
+    });
+  }
 
   initRightDock();
 
