@@ -277,7 +277,7 @@ body[data-view="clock"] .nav-search-wrapper {
   pointer-events: none;
   transform: scale(0.98);
   transition: opacity var(--transition-smooth), transform var(--transition-smooth);
-  padding: 20px 16px;
+  padding: 20px 0;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -295,12 +295,12 @@ body[data-view="clock"] #clock-view {
 }
 
 /* ============================================================
-   VIEW 1: SCATTERED CARDS
+   VIEW 1: SCATTERED CARDS (Full-Width Window Slide)
    ============================================================ */
 .scatter-stage {
   position: relative;
-  width: 100%;
-  max-width: 1300px;
+  width: 100vw;
+  max-width: 100%;
   min-height: 380px;
   display: flex;
   align-items: center;
@@ -311,11 +311,12 @@ body[data-view="clock"] #clock-view {
 
 .baseline-guide {
   position: absolute;
-  left: 5%;
-  right: 5%;
+  left: 0;
+  right: 0;
+  width: 100%;
   top: calc(50% - 7px);
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-subtle) 15%, var(--border-subtle) 85%, transparent);
+  background: linear-gradient(90deg, transparent, var(--border-subtle) 10%, var(--border-subtle) 90%, transparent);
   pointer-events: none;
   opacity: 0.35;
 }
@@ -323,15 +324,16 @@ body[data-view="clock"] #clock-view {
 .cards-track {
   display: flex;
   align-items: center;
-  gap: clamp(14px, 2vw, 24px);
+  gap: clamp(14px, 2.2vw, 26px);
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: visible;
-  /* Generous top & bottom padding so deep-scattered cards + hover scale + shadows never get cut off */
-  padding: 70px clamp(24px, 4vw, 48px) 85px clamp(24px, 4vw, 48px);
+  /* Full edge-to-edge sliding clearance with smooth padding */
+  padding: 70px clamp(24px, 5vw, 64px) 85px clamp(24px, 5vw, 64px);
   scrollbar-width: none;
   z-index: 1;
-  width: 100%;
+  width: 100vw;
+  max-width: 100%;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
