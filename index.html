@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Tab</title>
+  <style>
+/* ============================================================
+   FIREFOX CUSTOM NEW TAB - BASIC GRAY MINIMAL
+   Fonts: Iosevka Nerd Font / Iosevka / Monospace
+   ============================================================ */
+
+@font-face {
+  font-family: 'Iosevka Nerd Font';
+  src: local('Iosevka Nerd Font'), local('Iosevka NF'), local('Iosevka Custom'), local('Iosevka');
+}
+
+:root {
+  --font-mono: 'Iosevka Nerd Font', 'Iosevka Custom', 'Iosevka', monospace;
+  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* THEMES */
+body[data-theme="charcoal"] {
+  --bg-primary: #151517;
+  --bg-secondary: #1f1f23;
+  --bg-tertiary: #27272c;
+  --bg-hover: #313137;
+  --border-subtle: #2b2b31;
+  --border-strong: #3f3f48;
+  --text-main: #ededef;
+  --text-muted: #8a8a93;
+  --text-faint: #56565f;
+  --accent: #d4d4d8;
+  --accent-glow: rgba(212, 212, 216, 0.12);
+  --danger: #ef4444;
+}
+
+body[data-theme="slate"] {
+  --bg-primary: #14171c;
+  --bg-secondary: #1d2127;
+  --bg-tertiary: #252b34;
+  --bg-hover: #303742;
+  --border-subtle: #2b323c;
+  --border-strong: #3d4654;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-faint: #596579;
+  --accent: #cbd5e1;
+  --accent-glow: rgba(203, 213, 225, 0.12);
+  --danger: #f87171;
+}
+
+body[data-theme="oled"] {
+  --bg-primary: #0a0a0b;
+  --bg-secondary: #141416;
+  --bg-tertiary: #1c1c1f;
+  --bg-hover: #26262a;
+  --border-subtle: #222227;
+  --border-strong: #36363f;
+  --text-main: #f4f4f5;
+  --text-muted: #71717a;
+  --text-faint: #44444a;
+  --accent: #e4e4e7;
+  --accent-glow: rgba(228, 228, 231, 0.1);
+  --danger: #ef4444;
+}
+
+body[data-theme="paper"] {
+  --bg-primary: #e6e6e8;
+  --bg-secondary: #f2f2f4;
+  --bg-tertiary: #ffffff;
+  --bg-hover: #e0e0e4;
+  --border-subtle: #cfcfd4;
+  --border-strong: #b5b5bc;
+  --text-main: #18181b;
+  --text-muted: #52525b;
+  --text-faint: #8a8a93;
+  --accent: #27272a;
+  --accent-glow: rgba(39, 39, 42, 0.1);
+  --danger: #dc2626;
+}
+
+/* BASE RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+/* Constrain all SVGs by default */
+svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* TOP NAVIGATION */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.nav-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.system-time {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+}
+
+.system-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Centered Search Bar */
+.nav-search-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 440px;
+  transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+}
+
+body[data-view="clock"] .nav-search-wrapper {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.nav-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 6px 14px;
+  transition: all var(--transition-fast);
+}
+
+.nav-search:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background-color: var(--bg-tertiary);
+}
+
+.search-icon {
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-muted);
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.nav-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+}
+
+.nav-search input::placeholder {
+  color: var(--text-faint);
+}
+
+.search-engine-badge {
+  font-size: 0.7rem;
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 7px;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all var(--transition-fast);
+}
+
+.search-engine-badge:hover {
+  color: var(--text-main);
+  border-color: var(--border-strong);
+}
+
+/* Nav Right Buttons */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 6px 13px;
+  border-radius: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.nav-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+  border-color: var(--border-strong);
+}
+
+.nav-btn.active-highlight {
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.nav-btn-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* VIEW SWITCHING LOGIC */
+.view-container {
+  position: absolute;
+  top: 64px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.98);
+  transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+}
+
+body[data-view="cards"] #cards-view {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+body[data-view="clock"] #clock-view {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+/* VIEW 1: SCATTERED CARDS */
+.scatter-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 40px;
+}
+
+.baseline-guide {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.cards-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 40px 10px;
+  scrollbar-width: none;
+  z-index: 1;
+}
+
+.cards-track::-webkit-scrollbar {
+  display: none;
+}
+
+.quick-card {
+  position: relative;
+  width: 120px;
+  height: 140px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-main);
+  padding: 14px 10px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
+  flex-shrink: 0;
+}
+
+/* Scattered Offsets */
+.quick-card.scatter-up-deep     { transform: translateY(-38px); }
+.quick-card.scatter-up-mid      { transform: translateY(-22px); }
+.quick-card.scatter-up-shallow  { transform: translateY(-10px); }
+.quick-card.scatter-down-shallow{ transform: translateY(12px); }
+.quick-card.scatter-down-mid    { transform: translateY(24px); }
+.quick-card.scatter-down-deep   { transform: translateY(40px); }
+
+.quick-card:hover {
+  transform: translateY(0px) scale(1.08) !important;
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-strong);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--accent-glow);
+  z-index: 10;
+}
+
+.card-shortcut-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.65rem;
+  color: var(--text-faint);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 1px 5px;
+  font-weight: 600;
+}
+
+.card-icon-container {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.quick-card:hover .card-icon-container {
+  transform: scale(1.08);
+  border-color: var(--border-strong);
+}
+
+.card-icon-container svg {
+  width: 22px;
+  height: 22px;
+}
+
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
+}
+
+.card-domain {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.quick-card.add-card {
+  border-style: dashed;
+  background: transparent;
+  opacity: 0.6;
+}
+
+.quick-card.add-card:hover {
+  opacity: 1;
+  background: var(--bg-secondary);
+}
+
+.add-card .card-icon-container {
+  border-style: dashed;
+  font-size: 1.4rem;
+  color: var(--text-muted);
+}
+
+.cards-hint {
+  margin-top: 36px;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.cards-hint kbd {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 2px 5px;
+  color: var(--text-muted);
+}
+
+/* VIEW 2: APPLE STYLE CLOCK */
+.apple-clock-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clock-panel {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.clock-panel.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.apple-time-display {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 0.9;
+}
+
+.apple-time-display .digits {
+  font-size: clamp(6rem, 16vw, 14.5rem);
+  font-weight: 800;
+  letter-spacing: -6px;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.apple-time-display .sub-time {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 16px;
+  margin-top: 14px;
+}
+
+.apple-time-display .seconds {
+  font-size: clamp(1.4rem, 3.2vw, 3rem);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.apple-time-display .ampm {
+  font-size: clamp(0.9rem, 1.8vw, 1.6rem);
+  font-weight: 500;
+  color: var(--text-faint);
+  letter-spacing: 1px;
+}
+
+.apple-date-display {
+  margin-top: 24px;
+  font-size: clamp(0.85rem, 1.6vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.stopwatch-display, .timer-display {
+  font-size: clamp(4.5rem, 12vw, 10rem);
+  font-weight: 800;
+  letter-spacing: -4px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 24px;
+}
+
+.clock-action-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.pill-btn {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 24px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.pill-btn.primary {
+  background-color: var(--text-main);
+  color: var(--bg-primary);
+}
+
+.pill-btn.primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.pill-btn.secondary {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.pill-btn.secondary:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-strong);
+}
+
+.pill-btn.danger {
+  background-color: transparent;
+  border-color: var(--border-subtle);
+  color: var(--danger);
+}
+
+.pill-btn.danger:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger);
+}
+
+.pill-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.timer-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.preset-btn {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.preset-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.preset-btn.active {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent);
+  color: var(--text-main);
+}
+
+.stopwatch-laps {
+  width: 320px;
+  max-height: 140px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lap-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+
+/* RIGHT SIDE DOCK */
+.right-dock {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 28px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+}
+
+.dock-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.dock-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dock-btn:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-main);
+}
+
+.dock-btn.active {
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-strong);
+  color: var(--text-main);
+}
+
+.dock-tooltip {
+  position: absolute;
+  right: 56px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: all var(--transition-fast);
+}
+
+.dock-btn:hover .dock-tooltip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* BOTTOM DOCK (Specific to Clock Screen) */
+.bottom-dock-container {
+  position: fixed;
+  bottom: 24px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.bottom-dock {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 8px 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  transition: transform var(--transition-fast);
+}
+
+.bottom-dock-item {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: transform 0.2s cubic-bezier(0.2, 1, 0.3, 1),
+              background-color var(--transition-fast),
+              border-color var(--transition-fast);
+  position: relative;
+}
+
+.bottom-dock-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+.bottom-dock-item:hover {
+  transform: translateY(-8px) scale(1.15);
+  background-color: var(--bg-tertiary);
+  border-color: var(--border-strong);
+}
+
+.bottom-dock-tooltip {
+  position: absolute;
+  top: -32px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all var(--transition-fast);
+}
+
+.bottom-dock-item:hover .bottom-dock-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* MODAL */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 380px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modal-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-btn:hover {
+  color: var(--text-main);
+}
+
+#add-shortcut-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#add-shortcut-form label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#add-shortcut-form input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+#add-shortcut-form input:focus {
+  border-color: var(--border-strong);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+  </style>
+</head>
+<body data-theme="charcoal" data-view="cards">
+
+  <!-- Top Header Navigation -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <span class="system-time" id="nav-time">00:00</span>
+      <span class="system-date" id="nav-date">Tue, Oct 27</span>
+    </div>
+
+    <!-- Minimal Search Bar (Only shown in cards view) -->
+    <div class="nav-search-wrapper" id="nav-search-wrapper">
+      <div class="nav-search">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search or URL... [ / ]" autocomplete="off" spellcheck="false">
+        <div class="search-engine-badge" id="search-engine-badge" title="Click to toggle search engine (DuckDuckGo / Google)">DDG</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <!-- Theme Switcher -->
+      <button class="nav-btn" id="theme-toggle-btn" title="Cycle Gray Themes (Charcoal / Slate / OLED / Paper)">
+        <svg class="nav-btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41"></path>
+        </svg>
+        <span class="nav-btn-label" id="theme-label">Charcoal</span>
+      </button>
+
+      <!-- View Switcher (Cards <-> Apple Clock Mode) -->
+      <button class="nav-btn active-highlight" id="view-toggle-btn" title="Toggle Apple Clock / Cards Mode [Tab]">
+        <svg class="nav-btn-icon" id="view-icon-clock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span class="nav-btn-label" id="view-label">StandBy Clock</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================== -->
+  <!-- VIEW 1: SCATTERED CARDS QUICK LAUNCH VIEW      -->
+  <!-- ============================================== -->
+  <main class="view-container" id="cards-view">
+    <div class="scatter-stage">
+      <div class="baseline-guide"></div>
+      <div class="cards-track" id="cards-track">
+        <!-- Cards dynamically populated -->
+      </div>
+    </div>
+    <div class="cards-hint">
+      <span>Press <kbd>1</kbd>–<kbd>8</kbd> for quick launch • Press <kbd>/</kbd> to search • <kbd>Tab</kbd> to toggle clock mode</span>
+    </div>
+  </main>
+
+  <!-- ============================================== -->
+  <!-- VIEW 2: APPLE STYLE CLOCK SCREEN               -->
+  <!-- ============================================== -->
+  <main class="view-container" id="clock-view">
+    <div class="apple-clock-stage">
+      
+      <!-- SUB-SCREEN 1: BIG CLOCK -->
+      <section class="clock-panel active" id="panel-clock">
+        <div class="apple-time-display">
+          <div class="digits" id="apple-clock-digits">14:55</div>
+          <div class="sub-time">
+            <span class="seconds" id="apple-clock-seconds">00</span>
+            <span class="ampm" id="apple-clock-ampm">PM</span>
+          </div>
+        </div>
+        <div class="apple-date-display" id="apple-clock-date">
+          TUESDAY, OCTOBER 27
+        </div>
+      </section>
+
+      <!-- SUB-SCREEN 2: STOPWATCH -->
+      <section class="clock-panel" id="panel-stopwatch">
+        <div class="stopwatch-display" id="stopwatch-display">00:00.00</div>
+        <div class="clock-action-row">
+          <button class="pill-btn primary" id="sw-start-btn">Start</button>
+          <button class="pill-btn secondary" id="sw-lap-btn" disabled>Lap</button>
+          <button class="pill-btn danger" id="sw-reset-btn" disabled>Reset</button>
+        </div>
+        <div class="stopwatch-laps" id="sw-laps-container"></div>
+      </section>
+
+      <!-- SUB-SCREEN 3: TIMER -->
+      <section class="clock-panel" id="panel-timer">
+        <div class="timer-display" id="timer-display">15:00</div>
+        
+        <div class="timer-presets">
+          <button class="preset-btn" data-mins="1">1m</button>
+          <button class="preset-btn" data-mins="5">5m</button>
+          <button class="preset-btn active" data-mins="15">15m</button>
+          <button class="preset-btn" data-mins="25">25m (Pomo)</button>
+          <button class="preset-btn" data-mins="45">45m</button>
+        </div>
+
+        <div class="clock-action-row">
+          <button class="pill-btn primary" id="timer-start-btn">Start</button>
+          <button class="pill-btn secondary" id="timer-pause-btn" disabled>Pause</button>
+          <button class="pill-btn danger" id="timer-reset-btn">Reset</button>
+        </div>
+      </section>
+
+      <!-- RIGHT SIDE DOCK (Rounded buttons for Clock / Stopwatch / Timer) -->
+      <aside class="right-dock" aria-label="Clock features">
+        <button class="dock-btn active" data-panel="panel-clock" title="Clock">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="dock-tooltip">Clock</span>
+        </button>
+
+        <button class="dock-btn" data-panel="panel-stopwatch" title="Stopwatch">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="2" x2="12" y2="4"></line>
+            <path d="M12 4a8 8 0 1 0 8 8 8 8 0 0 0-8-8z"></path>
+            <polyline points="12 8 12 12 14 14"></polyline>
+          </svg>
+          <span class="dock-tooltip">Stopwatch</span>
+        </button>
+
+        <button class="dock-btn" data-panel="panel-timer" title="Timer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 10 14"></polyline>
+            <line x1="8" y1="2" x2="16" y2="2"></line>
+          </svg>
+          <span class="dock-tooltip">Timer</span>
+        </button>
+      </aside>
+
+      <!-- BOTTOM QUICK LAUNCH DOCK (Specific to the Clock Screen) -->
+      <footer class="bottom-dock-container">
+        <div class="bottom-dock" id="bottom-dock-items"></div>
+      </footer>
+
+    </div>
+  </main>
+
+  <!-- Add Site Modal -->
+  <div class="modal-backdrop" id="add-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Quick Launch Shortcut</h3>
+        <button class="close-btn" id="modal-close-btn">&times;</button>
+      </div>
+      <form id="add-shortcut-form">
+        <label for="shortcut-name">Title</label>
+        <input type="text" id="shortcut-name" placeholder="e.g. GitHub" required>
+        
+        <label for="shortcut-url">URL</label>
+        <input type="url" id="shortcut-url" placeholder="https://github.com" required>
+
+        <label for="shortcut-icon">Icon / Initials (1-3 letters)</label>
+        <input type="text" id="shortcut-icon" placeholder="GH" maxlength="4">
+
+        <div class="modal-actions">
+          <button type="button" class="pill-btn secondary" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="pill-btn primary">Add Site</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+// --- Standard SVGs for Top Sites ---
+const SVG_ICONS = {
+  github: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>`,
+  youtube: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>`,
+  reddit: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M17 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm-8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm1 4c1.5 1 4.5 1 6 0"></path><path d="M12 8v4"></path></svg>`,
+  gmail: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`,
+  chatgpt: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path><path d="m9 12 2 2 4-4"></path></svg>`,
+  gemini: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>`,
+  twitter: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>`,
+  spotify: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 11.5c3-1 6-1 8.5.5"></path><path d="M7 14.5c3.5-1 7.5-.5 10 1"></path><path d="M9 8.5c2.5-1 5.5-1 7.5.5"></path></svg>`
+};
+
+const DEFAULT_SITES = [
+  { id: '1', title: 'GitHub', url: 'https://github.com', iconKey: 'github', domain: 'github.com' },
+  { id: '2', title: 'YouTube', url: 'https://youtube.com', iconKey: 'youtube', domain: 'youtube.com' },
+  { id: '3', title: 'Reddit', url: 'https://reddit.com', iconKey: 'reddit', domain: 'reddit.com' },
+  { id: '4', title: 'Gmail', url: 'https://mail.google.com', iconKey: 'gmail', domain: 'mail.google.com' },
+  { id: '5', title: 'ChatGPT', url: 'https://chatgpt.com', iconKey: 'chatgpt', domain: 'chatgpt.com' },
+  { id: '6', title: 'Gemini', url: 'https://gemini.google.com', iconKey: 'gemini', domain: 'gemini.google.com' },
+  { id: '7', title: 'X / Twitter', url: 'https://x.com', iconKey: 'twitter', domain: 'x.com' },
+  { id: '8', title: 'Spotify', url: 'https://open.spotify.com', iconKey: 'spotify', domain: 'spotify.com' },
+];
+
+const SCATTER_PATTERNS = [
+  'scatter-up-deep',
+  'scatter-down-mid',
+  'scatter-up-mid',
+  'scatter-down-deep',
+  'scatter-up-shallow',
+  'scatter-down-shallow',
+  'scatter-up-deep',
+  'scatter-down-mid'
+];
+
+const THEMES = ['charcoal', 'slate', 'oled', 'paper'];
+
+// --- Application State ---
+const state = {
+  theme: localStorage.getItem('nft_theme') || 'charcoal',
+  view: localStorage.getItem('nft_view') || 'cards',
+  searchEngine: localStorage.getItem('nft_search_engine') || 'ddg',
+  sites: JSON.parse(localStorage.getItem('nft_sites')) || DEFAULT_SITES,
+  activeClockPanel: 'panel-clock',
+  stopwatch: { running: false, startTime: 0, elapsedTime: 0, timerId: null, laps: [] },
+  timer: { running: false, totalSeconds: 15 * 60, remainingSeconds: 15 * 60, timerId: null }
+};
+
+// --- DOM References ---
+const body = document.body;
+const navTime = document.getElementById('nav-time');
+const navDate = document.getElementById('nav-date');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeLabel = document.getElementById('theme-label');
+const viewToggleBtn = document.getElementById('view-toggle-btn');
+const viewLabel = document.getElementById('view-label');
+const searchInput = document.getElementById('search-input');
+const searchEngineBadge = document.getElementById('search-engine-badge');
+const cardsTrack = document.getElementById('cards-track');
+const bottomDockItems = document.getElementById('bottom-dock-items');
+
+const appleClockDigits = document.getElementById('apple-clock-digits');
+const appleClockSeconds = document.getElementById('apple-clock-seconds');
+const appleClockAmpm = document.getElementById('apple-clock-ampm');
+const appleClockDate = document.getElementById('apple-clock-date');
+
+const addModal = document.getElementById('add-modal');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+const modalCancelBtn = document.getElementById('modal-cancel-btn');
+const addShortcutForm = document.getElementById('add-shortcut-form');
+
+// --- Initialization ---
+function init() {
+  applyTheme(state.theme);
+  applyView(state.view);
+  updateSearchEngineBadge();
+  renderCards();
+  renderBottomDock();
+  startClock();
+  initStopwatch();
+  initTimer();
+  bindEvents();
+}
+
+function applyTheme(theme) {
+  state.theme = theme;
+  body.setAttribute('data-theme', theme);
+  localStorage.setItem('nft_theme', theme);
+  themeLabel.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+}
+
+function cycleTheme() {
+  const currentIndex = THEMES.indexOf(state.theme);
+  const nextTheme = THEMES[(currentIndex + 1) % THEMES.length];
+  applyTheme(nextTheme);
+}
+
+function applyView(view) {
+  state.view = view;
+  body.setAttribute('data-view', view);
+  localStorage.setItem('nft_view', view);
+
+  if (view === 'cards') {
+    viewLabel.textContent = 'StandBy Clock';
+    viewToggleBtn.classList.remove('active-highlight');
+  } else {
+    viewLabel.textContent = 'Dashboard';
+    viewToggleBtn.classList.add('active-highlight');
+  }
+}
+
+function toggleView() {
+  const nextView = state.view === 'cards' ? 'clock' : 'cards';
+  applyView(nextView);
+}
+
+function startClock() {
+  function update() {
+    const now = new Date();
+    let hours24 = now.getHours();
+    let hours12 = hours24 % 12 || 12;
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours24 >= 12 ? 'PM' : 'AM';
+
+    navTime.textContent = `${String(hours24).padStart(2, '0')}:${minutes}`;
+    
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const fullMonths = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    navDate.textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+    appleClockDigits.textContent = `${String(hours12).padStart(2, '0')}:${minutes}`;
+    appleClockSeconds.textContent = seconds;
+    appleClockAmpm.textContent = ampm;
+    appleClockDate.textContent = `${fullDays[now.getDay()]}, ${fullMonths[now.getMonth()]} ${now.getDate()}`;
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+function getIconHtml(site) {
+  if (site.iconKey && SVG_ICONS[site.iconKey]) {
+    return SVG_ICONS[site.iconKey];
+  }
+  return `<span>${site.icon || site.title.charAt(0).toUpperCase()}</span>`;
+}
+
+function renderCards() {
+  cardsTrack.innerHTML = '';
+
+  state.sites.forEach((site, index) => {
+    const scatterClass = SCATTER_PATTERNS[index % SCATTER_PATTERNS.length];
+    const card = document.createElement('a');
+    card.className = `quick-card ${scatterClass}`;
+    card.href = site.url;
+    card.setAttribute('data-index', index + 1);
+
+    const shortcutBadge = index < 9 
+      ? `<span class="card-shortcut-badge">${index + 1}</span>` 
+      : '';
+
+    card.innerHTML = `
+      ${shortcutBadge}
+      <div class="card-icon-container">${getIconHtml(site)}</div>
+      <div class="card-title">${site.title}</div>
+      <div class="card-domain">${site.domain || ''}</div>
+    `;
+
+    cardsTrack.appendChild(card);
+  });
+
+  const addCard = document.createElement('div');
+  addCard.className = 'quick-card add-card scatter-up-shallow';
+  addCard.innerHTML = `
+    <div class="card-icon-container">+</div>
+    <div class="card-title">Add Site</div>
+  `;
+  addCard.addEventListener('click', () => openModal());
+  cardsTrack.appendChild(addCard);
+}
+
+function renderBottomDock() {
+  bottomDockItems.innerHTML = '';
+
+  state.sites.forEach((site) => {
+    const dockItem = document.createElement('a');
+    dockItem.className = 'bottom-dock-item';
+    dockItem.href = site.url;
+    dockItem.title = site.title;
+
+    dockItem.innerHTML = `
+      ${getIconHtml(site)}
+      <span class="bottom-dock-tooltip">${site.title}</span>
+    `;
+
+    bottomDockItems.appendChild(dockItem);
+  });
+}
+
+function updateSearchEngineBadge() {
+  searchEngineBadge.textContent = state.searchEngine.toUpperCase();
+}
+
+function handleSearch(query) {
+  if (!query || !query.trim()) return;
+  const q = query.trim();
+
+  if (/^(https?:\/\/|localhost[:\/]|([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})(\/.*)?$/.test(q)) {
+    const targetUrl = q.startsWith('http://') || q.startsWith('https://') ? q : `https://${q}`;
+    window.location.href = targetUrl;
+    return;
+  }
+
+  if (q.startsWith('!gh ')) {
+    window.location.href = `https://github.com/search?q=${encodeURIComponent(q.slice(4))}`;
+    return;
+  }
+  if (q.startsWith('!yt ')) {
+    window.location.href = `https://www.youtube.com/results?search_query=${encodeURIComponent(q.slice(4))}`;
+    return;
+  }
+  if (q.startsWith('!w ')) {
+    window.location.href = `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(q.slice(3))}`;
+    return;
+  }
+  if (q.startsWith('!r ')) {
+    window.location.href = `https://www.reddit.com/search/?q=${encodeURIComponent(q.slice(3))}`;
+    return;
+  }
+
+  if (state.searchEngine === 'google') {
+    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+  } else {
+    window.location.href = `https://duckduckgo.com/?q=${encodeURIComponent(q)}`;
+  }
+}
+
+function initStopwatch() {
+  const display = document.getElementById('stopwatch-display');
+  const startBtn = document.getElementById('sw-start-btn');
+  const lapBtn = document.getElementById('sw-lap-btn');
+  const resetBtn = document.getElementById('sw-reset-btn');
+  const lapsContainer = document.getElementById('sw-laps-container');
+
+  function formatTime(ms) {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const centis = Math.floor((ms % 1000) / 10);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
+  }
+
+  function tick() {
+    const current = Date.now() - state.stopwatch.startTime + state.stopwatch.elapsedTime;
+    display.textContent = formatTime(current);
+  }
+
+  startBtn.addEventListener('click', () => {
+    if (!state.stopwatch.running) {
+      state.stopwatch.running = true;
+      state.stopwatch.startTime = Date.now();
+      state.stopwatch.timerId = setInterval(tick, 30);
+      startBtn.textContent = 'Pause';
+      lapBtn.disabled = false;
+      resetBtn.disabled = false;
+    } else {
+      state.stopwatch.running = false;
+      state.stopwatch.elapsedTime += Date.now() - state.stopwatch.startTime;
+      clearInterval(state.stopwatch.timerId);
+      startBtn.textContent = 'Resume';
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    state.stopwatch.running = false;
+    clearInterval(state.stopwatch.timerId);
+    state.stopwatch.startTime = 0;
+    state.stopwatch.elapsedTime = 0;
+    state.stopwatch.laps = [];
+    display.textContent = '00:00.00';
+    startBtn.textContent = 'Start';
+    lapBtn.disabled = true;
+    resetBtn.disabled = true;
+    lapsContainer.innerHTML = '';
+  });
+
+  lapBtn.addEventListener('click', () => {
+    const current = Date.now() - state.stopwatch.startTime + state.stopwatch.elapsedTime;
+    const lapNum = state.stopwatch.laps.length + 1;
+    state.stopwatch.laps.unshift({ num: lapNum, time: formatTime(current) });
+
+    lapsContainer.innerHTML = state.stopwatch.laps
+      .slice(0, 10)
+      .map(l => `<div class="lap-row"><span>Lap ${l.num}</span><span>${l.time}</span></div>`)
+      .join('');
+  });
+}
+
+function initTimer() {
+  const display = document.getElementById('timer-display');
+  const startBtn = document.getElementById('timer-start-btn');
+  const pauseBtn = document.getElementById('timer-pause-btn');
+  const resetBtn = document.getElementById('timer-reset-btn');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+
+  function formatTimer(secs) {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function playChime() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.8);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.8);
+    } catch (e) {}
+  }
+
+  function tick() {
+    if (state.timer.remainingSeconds <= 0) {
+      clearInterval(state.timer.timerId);
+      state.timer.running = false;
+      display.textContent = '00:00';
+      startBtn.textContent = 'Start';
+      pauseBtn.disabled = true;
+      playChime();
+      return;
+    }
+    state.timer.remainingSeconds--;
+    display.textContent = formatTimer(state.timer.remainingSeconds);
+  }
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      presetBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mins = parseInt(btn.getAttribute('data-mins'), 10);
+      clearInterval(state.timer.timerId);
+      state.timer.running = false;
+      state.timer.totalSeconds = mins * 60;
+      state.timer.remainingSeconds = mins * 60;
+      display.textContent = formatTimer(state.timer.remainingSeconds);
+      startBtn.textContent = 'Start';
+      pauseBtn.disabled = true;
+    });
+  });
+
+  startBtn.addEventListener('click', () => {
+    if (!state.timer.running) {
+      state.timer.running = true;
+      state.timer.timerId = setInterval(tick, 1000);
+      startBtn.textContent = 'Running';
+      pauseBtn.disabled = false;
+    }
+  });
+
+  pauseBtn.addEventListener('click', () => {
+    if (state.timer.running) {
+      clearInterval(state.timer.timerId);
+      state.timer.running = false;
+      startBtn.textContent = 'Resume';
+      pauseBtn.disabled = true;
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    clearInterval(state.timer.timerId);
+    state.timer.running = false;
+    state.timer.remainingSeconds = state.timer.totalSeconds;
+    display.textContent = formatTimer(state.timer.remainingSeconds);
+    startBtn.textContent = 'Start';
+    pauseBtn.disabled = true;
+  });
+}
+
+function initRightDock() {
+  const dockBtns = document.querySelectorAll('.dock-btn');
+  const panels = document.querySelectorAll('.clock-panel');
+
+  dockBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetPanelId = btn.getAttribute('data-panel');
+      dockBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      panels.forEach(p => {
+        p.classList.remove('active');
+        if (p.id === targetPanelId) {
+          p.classList.add('active');
+        }
+      });
+      state.activeClockPanel = targetPanelId;
+    });
+  });
+}
+
+function openModal() {
+  addModal.classList.add('open');
+  document.getElementById('shortcut-name').focus();
+}
+
+function closeModal() {
+  addModal.classList.remove('open');
+  addShortcutForm.reset();
+}
+
+function bindEvents() {
+  themeToggleBtn.addEventListener('click', cycleTheme);
+  viewToggleBtn.addEventListener('click', toggleView);
+
+  searchEngineBadge.addEventListener('click', () => {
+    state.searchEngine = state.searchEngine === 'ddg' ? 'google' : 'ddg';
+    localStorage.setItem('nft_search_engine', state.searchEngine);
+    updateSearchEngineBadge();
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleSearch(searchInput.value);
+  });
+
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalCancelBtn.addEventListener('click', closeModal);
+  addModal.addEventListener('click', (e) => {
+    if (e.target === addModal) closeModal();
+  });
+
+  addShortcutForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('shortcut-name').value.trim();
+    let url = document.getElementById('shortcut-url').value.trim();
+    let icon = document.getElementById('shortcut-icon').value.trim();
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    try {
+      const parsed = new URL(url);
+      const domain = parsed.hostname;
+      if (!icon) icon = name.substring(0, 2).toUpperCase();
+
+      const newSite = {
+        id: String(Date.now()),
+        title: name,
+        url: url,
+        icon: icon,
+        domain: domain
+      };
+
+      state.sites.push(newSite);
+      localStorage.setItem('nft_sites', JSON.stringify(state.sites));
+      renderCards();
+      renderBottomDock();
+      closeModal();
+    } catch (err) {
+      alert('Please enter a valid URL.');
+    }
+  });
+
+  initRightDock();
+
+  window.addEventListener('keydown', (e) => {
+    const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
+
+    if (e.key === 'Escape') {
+      if (addModal.classList.contains('open')) {
+        closeModal();
+      } else if (isTyping) {
+        document.activeElement.blur();
+      }
+      return;
+    }
+
+    if (isTyping) return;
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      toggleView();
+      return;
+    }
+
+    if (e.key === '/') {
+      e.preventDefault();
+      if (state.view !== 'cards') applyView('cards');
+      searchInput.focus();
+      return;
+    }
+
+    const num = parseInt(e.key, 10);
+    if (!isNaN(num) && num >= 1 && num <= state.sites.length) {
+      const targetSite = state.sites[num - 1];
+      if (targetSite && targetSite.url) {
+        window.location.href = targetSite.url;
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
