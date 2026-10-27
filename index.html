@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>New Tab</title>
   <style>
 /* ============================================================
-   FIREFOX CUSTOM NEW TAB - BASIC GRAY MINIMAL
+   FIREFOX CUSTOM NEW TAB - BASIC GRAY MINIMAL (RESPONSIVE)
    Fonts: Iosevka Nerd Font / Iosevka / Monospace
    ============================================================ */
 
@@ -19,6 +19,7 @@
   --font-mono: 'Iosevka Nerd Font', 'Iosevka Custom', 'Iosevka', monospace;
   --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-smooth: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  --nav-height: 64px;
 }
 
 /* THEMES */
@@ -89,10 +90,15 @@ body[data-theme="paper"] {
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  font-size: 16px;
+}
+
+body {
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
   background-color: var(--bg-primary);
   color: var(--text-main);
   font-family: var(--font-mono);
@@ -101,7 +107,6 @@ html, body {
   transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
-/* Constrain all SVGs by default */
 svg {
   display: block;
   flex-shrink: 0;
@@ -113,19 +118,23 @@ svg {
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  padding: 0 32px;
+  height: var(--nav-height);
+  padding: 0 clamp(14px, 3vw, 32px);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   z-index: 100;
+  background: linear-gradient(180deg, var(--bg-primary) 70%, transparent 100%);
+  backdrop-filter: blur(8px);
 }
 
 .nav-left {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  font-size: 0.95rem;
+  gap: clamp(6px, 1.5vw, 12px);
+  font-size: clamp(0.82rem, 1.8vw, 0.95rem);
+  flex-shrink: 0;
 }
 
 .system-time {
@@ -135,7 +144,7 @@ svg {
 }
 
 .system-date {
-  font-size: 0.8rem;
+  font-size: clamp(0.72rem, 1.4vw, 0.8rem);
   color: var(--text-muted);
 }
 
@@ -144,8 +153,7 @@ svg {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 440px;
+  width: min(440px, calc(100vw - 260px));
   transition: opacity var(--transition-smooth), transform var(--transition-smooth);
 }
 
@@ -182,12 +190,13 @@ body[data-view="clock"] .nav-search-wrapper {
 
 .nav-search input {
   flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   outline: none;
   color: var(--text-main);
   font-family: var(--font-mono);
-  font-size: 0.88rem;
+  font-size: clamp(0.78rem, 1.6vw, 0.88rem);
 }
 
 .nav-search input::placeholder {
@@ -195,7 +204,7 @@ body[data-view="clock"] .nav-search-wrapper {
 }
 
 .search-engine-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   background-color: var(--bg-tertiary);
   color: var(--text-muted);
   border: 1px solid var(--border-subtle);
@@ -204,6 +213,7 @@ body[data-view="clock"] .nav-search-wrapper {
   cursor: pointer;
   letter-spacing: 0.5px;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 .search-engine-badge:hover {
@@ -215,23 +225,25 @@ body[data-view="clock"] .nav-search-wrapper {
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: clamp(6px, 1.2vw, 10px);
+  flex-shrink: 0;
 }
 
 .nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 6px 13px;
+  font-size: clamp(0.72rem, 1.4vw, 0.78rem);
+  padding: 6px clamp(8px, 1.2vw, 13px);
   border-radius: 16px;
   cursor: pointer;
   outline: none;
   transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .nav-btn:hover {
@@ -253,7 +265,7 @@ body[data-view="clock"] .nav-search-wrapper {
 /* VIEW SWITCHING LOGIC */
 .view-container {
   position: absolute;
-  top: 64px;
+  top: var(--nav-height);
   bottom: 0;
   left: 0;
   right: 0;
@@ -265,6 +277,9 @@ body[data-view="clock"] .nav-search-wrapper {
   pointer-events: none;
   transform: scale(0.98);
   transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+  padding: 20px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 body[data-view="cards"] #cards-view {
@@ -279,39 +294,43 @@ body[data-view="clock"] #clock-view {
   transform: scale(1);
 }
 
-/* VIEW 1: SCATTERED CARDS */
+/* ============================================================
+   VIEW 1: SCATTERED CARDS
+   ============================================================ */
 .scatter-stage {
   position: relative;
   width: 100%;
   max-width: 1300px;
-  height: 380px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 40px;
+  padding: 30px clamp(10px, 3vw, 40px);
 }
 
 .baseline-guide {
   position: absolute;
-  left: 10%;
-  right: 10%;
+  left: 5%;
+  right: 5%;
   top: 50%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border-subtle) 20%, var(--border-subtle) 80%, transparent);
+  background: linear-gradient(90deg, transparent, var(--border-subtle) 15%, var(--border-subtle) 85%, transparent);
   pointer-events: none;
-  opacity: 0.4;
+  opacity: 0.35;
 }
 
 .cards-track {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: clamp(12px, 2vw, 22px);
   flex-wrap: nowrap;
   overflow-x: auto;
-  padding: 40px 10px;
+  padding: 45px 12px;
   scrollbar-width: none;
   z-index: 1;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cards-track::-webkit-scrollbar {
@@ -320,18 +339,18 @@ body[data-view="clock"] #clock-view {
 
 .quick-card {
   position: relative;
-  width: 120px;
-  height: 140px;
+  width: clamp(96px, 9vw, 120px);
+  height: clamp(118px, 11vw, 140px);
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
-  border-radius: 20px;
+  border-radius: clamp(16px, 1.8vw, 20px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   color: var(--text-main);
-  padding: 14px 10px;
+  padding: 12px 8px;
   cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1),
               background-color var(--transition-fast),
@@ -341,12 +360,12 @@ body[data-view="clock"] #clock-view {
 }
 
 /* Scattered Offsets */
-.quick-card.scatter-up-deep     { transform: translateY(-38px); }
-.quick-card.scatter-up-mid      { transform: translateY(-22px); }
-.quick-card.scatter-up-shallow  { transform: translateY(-10px); }
-.quick-card.scatter-down-shallow{ transform: translateY(12px); }
-.quick-card.scatter-down-mid    { transform: translateY(24px); }
-.quick-card.scatter-down-deep   { transform: translateY(40px); }
+.quick-card.scatter-up-deep     { transform: translateY(-34px); }
+.quick-card.scatter-up-mid      { transform: translateY(-20px); }
+.quick-card.scatter-up-shallow  { transform: translateY(-9px); }
+.quick-card.scatter-down-shallow{ transform: translateY(10px); }
+.quick-card.scatter-down-mid    { transform: translateY(22px); }
+.quick-card.scatter-down-deep   { transform: translateY(36px); }
 
 .quick-card:hover {
   transform: translateY(0px) scale(1.08) !important;
@@ -358,9 +377,9 @@ body[data-view="clock"] #clock-view {
 
 .card-shortcut-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 0.65rem;
+  top: 7px;
+  right: 7px;
+  font-size: 0.62rem;
   color: var(--text-faint);
   background: var(--bg-primary);
   border: 1px solid var(--border-subtle);
@@ -370,15 +389,15 @@ body[data-view="clock"] #clock-view {
 }
 
 .card-icon-container {
-  width: 44px;
-  height: 44px;
+  width: clamp(36px, 3.8vw, 44px);
+  height: clamp(36px, 3.8vw, 44px);
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  margin-bottom: 12px;
+  margin-bottom: clamp(6px, 1vw, 10px);
   transition: transform var(--transition-fast);
 }
 
@@ -388,12 +407,12 @@ body[data-view="clock"] #clock-view {
 }
 
 .card-icon-container svg {
-  width: 22px;
-  height: 22px;
+  width: clamp(18px, 2vw, 22px);
+  height: clamp(18px, 2vw, 22px);
 }
 
 .card-title {
-  font-size: 0.8rem;
+  font-size: clamp(0.72rem, 1.4vw, 0.8rem);
   font-weight: 600;
   color: var(--text-main);
   text-align: center;
@@ -404,7 +423,7 @@ body[data-view="clock"] #clock-view {
 }
 
 .card-domain {
-  font-size: 0.65rem;
+  font-size: clamp(0.6rem, 1.1vw, 0.65rem);
   color: var(--text-muted);
   margin-top: 2px;
 }
@@ -422,14 +441,16 @@ body[data-view="clock"] #clock-view {
 
 .add-card .card-icon-container {
   border-style: dashed;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   color: var(--text-muted);
 }
 
 .cards-hint {
-  margin-top: 36px;
-  font-size: 0.75rem;
+  margin-top: clamp(20px, 4vh, 36px);
+  font-size: clamp(0.68rem, 1.3vw, 0.75rem);
   color: var(--text-faint);
+  text-align: center;
+  padding: 0 10px;
 }
 
 .cards-hint kbd {
@@ -440,12 +461,15 @@ body[data-view="clock"] #clock-view {
   color: var(--text-muted);
 }
 
-/* VIEW 2: APPLE STYLE CLOCK */
+/* ============================================================
+   VIEW 2: APPLE STYLE CLOCK SCREEN
+   ============================================================ */
 .apple-clock-stage {
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
@@ -456,6 +480,7 @@ body[data-view="clock"] #clock-view {
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.3s ease forwards;
+  width: 100%;
 }
 
 .clock-panel.active {
@@ -471,13 +496,13 @@ body[data-view="clock"] #clock-view {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  line-height: 0.9;
+  line-height: 0.88;
 }
 
 .apple-time-display .digits {
-  font-size: clamp(6rem, 16vw, 14.5rem);
+  font-size: clamp(4.2rem, 15vw, 14.5rem);
   font-weight: 800;
-  letter-spacing: -6px;
+  letter-spacing: clamp(-4px, -1vw, -8px);
   color: var(--text-main);
   font-variant-numeric: tabular-nums;
   text-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
@@ -486,53 +511,58 @@ body[data-view="clock"] #clock-view {
 .apple-time-display .sub-time {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-left: 16px;
-  margin-top: 14px;
+  gap: clamp(4px, 1vw, 8px);
+  margin-left: clamp(8px, 1.8vw, 18px);
+  margin-top: clamp(6px, 1.5vw, 16px);
 }
 
 .apple-time-display .seconds {
-  font-size: clamp(1.4rem, 3.2vw, 3rem);
+  font-size: clamp(1.1rem, 3.2vw, 3rem);
   font-weight: 600;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
 
 .apple-time-display .ampm {
-  font-size: clamp(0.9rem, 1.8vw, 1.6rem);
+  font-size: clamp(0.75rem, 1.8vw, 1.6rem);
   font-weight: 500;
   color: var(--text-faint);
   letter-spacing: 1px;
 }
 
 .apple-date-display {
-  margin-top: 24px;
-  font-size: clamp(0.85rem, 1.6vw, 1.4rem);
+  margin-top: clamp(16px, 3vh, 28px);
+  font-size: clamp(0.72rem, 1.8vw, 1.35rem);
   font-weight: 600;
-  letter-spacing: 0.35em;
+  letter-spacing: clamp(0.12em, 0.4vw, 0.35em);
   color: var(--text-muted);
   text-transform: uppercase;
+  text-align: center;
+  padding: 0 12px;
 }
 
 .stopwatch-display, .timer-display {
-  font-size: clamp(4.5rem, 12vw, 10rem);
+  font-size: clamp(3.2rem, 11vw, 9.5rem);
   font-weight: 800;
-  letter-spacing: -4px;
+  letter-spacing: clamp(-2px, -0.6vw, -4px);
   font-variant-numeric: tabular-nums;
-  margin-bottom: 24px;
+  margin-bottom: clamp(14px, 3vh, 24px);
+  text-align: center;
 }
 
 .clock-action-row {
   display: flex;
-  gap: 14px;
+  gap: clamp(8px, 1.5vw, 14px);
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .pill-btn {
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: clamp(0.78rem, 1.5vw, 0.85rem);
   font-weight: 600;
-  padding: 10px 24px;
+  padding: clamp(8px, 1.4vw, 10px) clamp(18px, 2.5vw, 24px);
   border-radius: 24px;
   border: 1px solid transparent;
   cursor: pointer;
@@ -579,8 +609,11 @@ body[data-view="clock"] #clock-view {
 
 .timer-presets {
   display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: clamp(6px, 1.2vw, 8px);
+  margin-bottom: clamp(16px, 3vh, 24px);
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 92vw;
 }
 
 .preset-btn {
@@ -588,8 +621,8 @@ body[data-view="clock"] #clock-view {
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  padding: 6px 14px;
+  font-size: clamp(0.72rem, 1.4vw, 0.8rem);
+  padding: 6px clamp(10px, 1.5vw, 14px);
   border-radius: 14px;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -607,7 +640,7 @@ body[data-view="clock"] #clock-view {
 }
 
 .stopwatch-laps {
-  width: 320px;
+  width: min(320px, 90vw);
   max-height: 140px;
   overflow-y: auto;
   border-top: 1px solid var(--border-subtle);
@@ -627,7 +660,7 @@ body[data-view="clock"] #clock-view {
 /* RIGHT SIDE DOCK */
 .right-dock {
   position: fixed;
-  right: 28px;
+  right: clamp(12px, 2.5vw, 28px);
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -639,12 +672,13 @@ body[data-view="clock"] #clock-view {
   padding: 8px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   z-index: 50;
+  backdrop-filter: blur(8px);
 }
 
 .dock-btn {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: clamp(38px, 4vw, 44px);
+  height: clamp(38px, 4vw, 44px);
   border-radius: 50%;
   background: transparent;
   border: 1px solid transparent;
@@ -658,8 +692,8 @@ body[data-view="clock"] #clock-view {
 }
 
 .dock-btn svg {
-  width: 20px;
-  height: 20px;
+  width: clamp(18px, 2vw, 20px);
+  height: clamp(18px, 2vw, 20px);
 }
 
 .dock-btn:hover {
@@ -694,35 +728,42 @@ body[data-view="clock"] #clock-view {
   transform: translateX(0);
 }
 
-/* BOTTOM DOCK (Specific to Clock Screen) */
+/* BOTTOM QUICK LAUNCH DOCK (Clock Screen) */
 .bottom-dock-container {
   position: fixed;
-  bottom: 24px;
+  bottom: clamp(12px, 2.5vh, 24px);
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
   pointer-events: none;
+  padding: 0 12px;
 }
 
 .bottom-dock {
   pointer-events: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(6px, 1.5vw, 12px);
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 24px;
-  padding: 8px 16px;
+  padding: 6px clamp(10px, 1.8vw, 16px);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
-  transition: transform var(--transition-fast);
+  max-width: 94vw;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bottom-dock::-webkit-scrollbar {
+  display: none;
 }
 
 .bottom-dock-item {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: clamp(34px, 4vw, 42px);
+  height: clamp(34px, 4vw, 42px);
+  border-radius: clamp(10px, 1.2vw, 14px);
   background-color: var(--bg-primary);
   border: 1px solid var(--border-subtle);
   display: flex;
@@ -736,26 +777,27 @@ body[data-view="clock"] #clock-view {
               background-color var(--transition-fast),
               border-color var(--transition-fast);
   position: relative;
+  flex-shrink: 0;
 }
 
 .bottom-dock-item svg {
-  width: 20px;
-  height: 20px;
+  width: clamp(16px, 2vw, 20px);
+  height: clamp(16px, 2vw, 20px);
 }
 
 .bottom-dock-item:hover {
-  transform: translateY(-8px) scale(1.15);
+  transform: translateY(-6px) scale(1.12);
   background-color: var(--bg-tertiary);
   border-color: var(--border-strong);
 }
 
 .bottom-dock-tooltip {
   position: absolute;
-  top: -32px;
+  top: -30px;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border-subtle);
   color: var(--text-main);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   padding: 3px 8px;
   border-radius: 6px;
   white-space: nowrap;
@@ -782,6 +824,7 @@ body[data-view="clock"] #clock-view {
   z-index: 200;
   opacity: 0;
   pointer-events: none;
+  padding: 16px;
   transition: opacity var(--transition-fast);
 }
 
@@ -796,7 +839,7 @@ body[data-view="clock"] #clock-view {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-strong);
   border-radius: 20px;
-  padding: 24px;
+  padding: clamp(18px, 3vw, 24px);
   box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
@@ -859,6 +902,131 @@ body[data-view="clock"] #clock-view {
   gap: 10px;
   margin-top: 10px;
 }
+
+/* ============================================================
+   RESPONSIVE MEDIA QUERIES (Every Device Adaptation)
+   ============================================================ */
+
+/* TABLETS & SMALL LAPTOPS (<= 900px) */
+@media (max-width: 900px) {
+  .nav-search-wrapper {
+    width: min(340px, calc(100vw - 220px));
+  }
+}
+
+/* SMALL TABLETS & PORTRAIT (<= 768px) */
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 58px;
+  }
+
+  /* Compact header labels */
+  .nav-btn-label {
+    display: none;
+  }
+
+  .nav-btn {
+    padding: 7px;
+    border-radius: 50%;
+  }
+
+  /* Right dock turns into horizontal floating control above bottom dock */
+  .right-dock {
+    position: fixed;
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: clamp(66px, 9vh, 78px);
+    transform: translateX(-50%);
+    flex-direction: row;
+    padding: 6px;
+    border-radius: 24px;
+    gap: 8px;
+  }
+
+  .dock-tooltip {
+    display: none;
+  }
+
+  /* Allow cards to scroll cleanly horizontally with nice padding */
+  .cards-track {
+    justify-content: flex-start;
+    padding: 40px 16px;
+  }
+
+  .baseline-guide {
+    display: none; /* Hide baseline line on small touch screens to keep clean */
+  }
+
+  .quick-card.scatter-up-deep     { transform: translateY(-16px); }
+  .quick-card.scatter-up-mid      { transform: translateY(-10px); }
+  .quick-card.scatter-up-shallow  { transform: translateY(-4px); }
+  .quick-card.scatter-down-shallow{ transform: translateY(4px); }
+  .quick-card.scatter-down-mid    { transform: translateY(10px); }
+  .quick-card.scatter-down-deep   { transform: translateY(16px); }
+}
+
+/* MOBILE PHONES (<= 560px) */
+@media (max-width: 560px) {
+  .system-date {
+    display: none; /* Hide date on small phone top-left so search bar has room */
+  }
+
+  .nav-search-wrapper {
+    position: static;
+    transform: none;
+    flex: 1;
+    max-width: none;
+    margin: 0 4px;
+  }
+
+  body[data-view="clock"] .nav-search-wrapper {
+    display: none;
+  }
+
+  .nav-search {
+    padding: 5px 10px;
+  }
+
+  .search-engine-badge {
+    display: none;
+  }
+
+  .apple-time-display {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .apple-time-display .sub-time {
+    flex-direction: row;
+    margin-left: 0;
+    margin-top: 4px;
+  }
+
+  .apple-date-display {
+    margin-top: 12px;
+  }
+
+  .bottom-dock-container {
+    bottom: 12px;
+  }
+
+  .bottom-dock-tooltip {
+    display: none;
+  }
+}
+
+/* ULTRA NARROW SCREENS (<= 360px) */
+@media (max-width: 360px) {
+  .system-time {
+    font-size: 0.8rem;
+  }
+
+  .quick-card {
+    width: 88px;
+    height: 110px;
+  }
+}
   </style>
 </head>
 <body data-theme="charcoal" data-view="cards">
@@ -870,7 +1038,7 @@ body[data-view="clock"] #clock-view {
       <span class="system-date" id="nav-date">Tue, Oct 27</span>
     </div>
 
-    <!-- Minimal Search Bar (Only shown in cards view) -->
+    <!-- Minimal Search Bar -->
     <div class="nav-search-wrapper" id="nav-search-wrapper">
       <div class="nav-search">
         <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
